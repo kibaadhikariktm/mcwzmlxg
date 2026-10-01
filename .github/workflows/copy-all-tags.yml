@@ -26,21 +26,14 @@ jobs:
 
           SOURCE="docker://reignz3/wzml"
           TARGET="docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/rhkwz"
-          SOURCE_REPO="reignz3/wzml"
-          TARGET_REPO="${{ secrets.DOCKERHUB_USERNAME }}/rhkwz"
 
-          URL="https://hub.docker.com/v2/repositories/mysterysd/wzmlx/tags/?page_size=100"
-          SOURCE="docker://${SOURCE_REPO}"
-          TARGET="docker://docker.io/${TARGET_REPO}"
-
-          URL="https://hub.docker.com/v2/repositories/${SOURCE_REPO}/tags/?page_size=100"
+          URL="https://hub.docker.com/v2/repositories/reignz3/wzml/tags/?page_size=100"
 
           COUNT=0
 
           while [ -n "$URL" ] && [ "$URL" != "null" ]; do
 
             echo "Fetching tags..."
-            echo "Fetching tags from ${SOURCE_REPO}..."
             RESPONSE=$(curl -fsSL "$URL")
 
             TAGS=$(echo "$RESPONSE" | jq -r '.results[].name')
@@ -54,22 +47,11 @@ jobs:
               echo "=========================================="
 
               skopeo copy \
-              if skopeo copy \
                 --all \
                 "${SOURCE}:${TAG}" \
                 "${TARGET}:${TAG}"
-                "${TARGET}:${TAG}"; then
-
-                COUNT=$((COUNT + 1))
-                echo "Successfully mirrored: ${TAG}"
-
-              else
-
-                echo "WARNING: Failed to mirror tag: ${TAG}"
-                echo "Skipping..."
 
               COUNT=$((COUNT + 1))
-              fi
 
             done <<< "$TAGS"
 
