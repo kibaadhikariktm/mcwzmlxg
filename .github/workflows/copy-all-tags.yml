@@ -1,0 +1,54 @@
+name: Copy all Docker tags
+
+on:
+  workflow_dispatch:
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Copy all tags
+        shell: bash
+        run: |
+          set -e
+
+          SOURCE="mysterysd/wzmlx"
+          TARGET="${{ secrets.DOCKERHUB_USERNAME }}/wzmlx"
+
+          echo "Getting all tags..."
+
+          URL="https://hub.docker.com/v2/repositories/${SOURCE}/tags/?page_size=100"
+
+          while [ -n "$URL" ] && [ "$URL" != "null" ]; do
+
+            echo "Reading tags from: $URL"
+
+            RESPONSE=$(curl -fsSL "$URL")
+
+            echo "$RESPONSE" | jq -r '.results[].name' | while read -r TAG; do
+
+              echo "========================================"
+              echo "Copying: ${SOURCE}:${TAG}"
+              echo "To:      ${TARGET}:${TAG}"
+              echo "========================================"
+
+              docker pull "${SOURCE}:${TAG}"
+              docker tag "${SOURCE}:${TAG}" "${TARGET}:${TAG}"
+              docker push "${TARGET}:${TAG}"
+
+            done
+
+            URL=$(echo "$RESPONSE" | jq -r '.next')
+
+          done
+
+          echo "========================================"
+          echo "Finished copying all tags!"
+          echo "========================================"
