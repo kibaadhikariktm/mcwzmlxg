@@ -24,8 +24,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          SOURCE="docker://mysterysd/wzmlx"
-          TARGET="docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/mcwzmlx"
+          SOURCE="docker://reignz3/wzml"
+          TARGET="docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/rhkwz"
 
           URL="https://hub.docker.com/v2/repositories/mysterysd/wzmlx/tags/?page_size=100"
 
