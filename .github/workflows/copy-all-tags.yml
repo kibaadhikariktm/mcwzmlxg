@@ -1,4 +1,3 @@
-```yaml
 name: Mirror all Docker tags
 
 on:
@@ -25,9 +24,12 @@ jobs:
         run: |
           set -euo pipefail
 
+          SOURCE="docker://reignz3/wzml"
+          TARGET="docker://docker.io/${{ secrets.DOCKERHUB_USERNAME }}/rhkwz"
           SOURCE_REPO="reignz3/wzml"
           TARGET_REPO="${{ secrets.DOCKERHUB_USERNAME }}/rhkwz"
 
+          URL="https://hub.docker.com/v2/repositories/mysterysd/wzmlx/tags/?page_size=100"
           SOURCE="docker://${SOURCE_REPO}"
           TARGET="docker://docker.io/${TARGET_REPO}"
 
@@ -37,6 +39,7 @@ jobs:
 
           while [ -n "$URL" ] && [ "$URL" != "null" ]; do
 
+            echo "Fetching tags..."
             echo "Fetching tags from ${SOURCE_REPO}..."
             RESPONSE=$(curl -fsSL "$URL")
 
@@ -50,9 +53,11 @@ jobs:
               echo "Mirroring tag: $TAG"
               echo "=========================================="
 
+              skopeo copy \
               if skopeo copy \
                 --all \
                 "${SOURCE}:${TAG}" \
+                "${TARGET}:${TAG}"
                 "${TARGET}:${TAG}"; then
 
                 COUNT=$((COUNT + 1))
@@ -63,6 +68,7 @@ jobs:
                 echo "WARNING: Failed to mirror tag: ${TAG}"
                 echo "Skipping..."
 
+              COUNT=$((COUNT + 1))
               fi
 
             done <<< "$TAGS"
@@ -76,4 +82,3 @@ jobs:
           echo "Mirror completed."
           echo "Tags copied: $COUNT"
           echo "=========================================="
-```
